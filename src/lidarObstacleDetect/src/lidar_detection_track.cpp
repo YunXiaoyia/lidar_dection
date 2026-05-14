@@ -13,9 +13,11 @@
 // 标准�?
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include <chrono> 
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <numeric>
 #include <ctime>
 #include <sys/time.h> 
@@ -122,6 +124,10 @@ public:
         _pub_noground_cloud = nh_.advertise<sensor_msgs::PointCloud2>("/fusion/nopoints_ground", 1);
         _pub_cluster_cloud = nh_.advertise<sensor_msgs::PointCloud2>("/fusion/cluster_cloud", 1);
         pnh_.param("publish_ground_debug", publish_ground_debug_, true);
+        pnh_.param("use_low_height_cluster_filter", use_low_height_cluster_filter_, true);
+        pnh_.param("low_height_cluster_max_height", low_height_cluster_max_height_, 0.18);
+        pnh_.param("low_height_cluster_min_xy_area", low_height_cluster_min_xy_area_, 0.0);
+        pnh_.param("cluster_marker_min_height", cluster_marker_min_height_, 0.0);
 
         points_buffer_.resize(CHANNEL, 200000); 
         ROS_INFO("Node Started: Hybrid Mode (DSVT->Tracker + Cluster->Visual).");
@@ -299,6 +305,14 @@ public:
         pcl::PointCloud<pcl::PointXYZI>::Ptr outCloudPtr(new pcl::PointCloud<pcl::PointXYZI>);
         std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> pointsVector;
         cluster_.segmentByDistance(noground_cloud_ptr, outCloudPtr, pointsVector);
+        pcl::PointCloud<pcl::PointXYZI>::Ptr filteredClusterCloudPtr(new pcl::PointCloud<pcl::PointXYZI>);
+        std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> filteredPointsVector;
+        const int filtered_ground_clusters = filterLowHeightClusters(pointsVector, filteredPointsVector, filteredClusterCloudPtr);
+        if (filtered_ground_clusters > 0) {
+            ROS_DEBUG_THROTTLE(1.0, "[ClusterFilter] dropped %d low-height ground-like clusters", filtered_ground_clusters);
+        }
+        pointsVector.swap(filteredPointsVector);
+        outCloudPtr = filteredClusterCloudPtr;
 
         autoware_msgs::CloudClusterArray inOutClusters;
         boundingBox_.getBoundingBox(header, pointsVector, inOutClusters);
@@ -549,7 +563,13 @@ public:
             // 获取 Cluster 高度
             double min_z = cluster.min_point.point.z;
             double max_z = cluster.max_point.point.z;
-            if (max_z - min_z < 0.1) max_z = min_z + 1.0;
+            if (max_z < min_z) std::swap(min_z, max_z);
+            const double actual_height = max_z - min_z;
+            if (cluster_marker_min_height_ > 0.0 && actual_height < cluster_marker_min_height_) {
+                const double center_z = 0.5 * (min_z + max_z);
+                min_z = center_z - 0.5 * cluster_marker_min_height_;
+                max_z = center_z + 0.5 * cluster_marker_min_height_;
+            }
 
             const auto& points = cluster.convex_hull.polygon.points;
             size_t num_points = points.size();
@@ -606,6 +626,81 @@ public:
         // if (obj.center.z() > 5.0) return false; 
         // if (obj.center.z() + obj.size.z() / 2.0 < 0.0) return false; 
         return true;
+    }
+
+    struct ClusterCloudStats {
+        bool valid = false;
+        double min_x = 0.0;
+        double max_x = 0.0;
+        double min_y = 0.0;
+        double max_y = 0.0;
+        double min_z = 0.0;
+        double max_z = 0.0;
+        double height = 0.0;
+        double xy_area = 0.0;
+    };
+
+    void normalizeCloudMetadata(const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud) const {
+        if (!cloud) return;
+        cloud->width = static_cast<uint32_t>(cloud->points.size());
+        cloud->height = 1;
+        cloud->is_dense = false;
+    }
+
+    ClusterCloudStats computeClusterCloudStats(const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud) const {
+        ClusterCloudStats stats;
+        if (!cloud || cloud->points.empty()) return stats;
+
+        stats.min_x = stats.min_y = stats.min_z = std::numeric_limits<double>::max();
+        stats.max_x = stats.max_y = stats.max_z = -std::numeric_limits<double>::max();
+        for (const auto& p : cloud->points) {
+            if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(p.z)) continue;
+            stats.min_x = std::min(stats.min_x, static_cast<double>(p.x));
+            stats.max_x = std::max(stats.max_x, static_cast<double>(p.x));
+            stats.min_y = std::min(stats.min_y, static_cast<double>(p.y));
+            stats.max_y = std::max(stats.max_y, static_cast<double>(p.y));
+            stats.min_z = std::min(stats.min_z, static_cast<double>(p.z));
+            stats.max_z = std::max(stats.max_z, static_cast<double>(p.z));
+            stats.valid = true;
+        }
+        if (!stats.valid) return stats;
+
+        stats.height = std::max(0.0, stats.max_z - stats.min_z);
+        const double length = std::max(0.0, stats.max_x - stats.min_x);
+        const double width = std::max(0.0, stats.max_y - stats.min_y);
+        stats.xy_area = length * width;
+        return stats;
+    }
+
+    bool isLowHeightGroundLikeCluster(const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud) const {
+        if (!use_low_height_cluster_filter_) return false;
+
+        const ClusterCloudStats stats = computeClusterCloudStats(cloud);
+        if (!stats.valid) return true;
+        if (stats.height > low_height_cluster_max_height_) return false;
+        if (low_height_cluster_min_xy_area_ > 0.0 && stats.xy_area < low_height_cluster_min_xy_area_) return false;
+        return true;
+    }
+
+    int filterLowHeightClusters(const std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>& input_clusters,
+                                std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>& output_clusters,
+                                pcl::PointCloud<pcl::PointXYZI>::Ptr& output_cloud) const {
+        output_clusters.clear();
+        output_cloud->clear();
+
+        int filtered_count = 0;
+        for (const auto& cluster_cloud : input_clusters) {
+            if (!cluster_cloud || cluster_cloud->points.empty()) continue;
+            normalizeCloudMetadata(cluster_cloud);
+            if (isLowHeightGroundLikeCluster(cluster_cloud)) {
+                ++filtered_count;
+                continue;
+            }
+            output_clusters.push_back(cluster_cloud);
+            *output_cloud += *cluster_cloud;
+        }
+        normalizeCloudMetadata(output_cloud);
+        return filtered_count;
     }
 
     bool isOverlap(const lidar_net::base::BoundingBox& dl_box, const lidar_net::base::BoundingBox& cluster_box) {
@@ -726,6 +821,10 @@ private:
     int64_t total_time_ = 0;
     int counter_ = 0;
     bool publish_ground_debug_ = true;
+    bool use_low_height_cluster_filter_ = true;
+    double low_height_cluster_max_height_ = 0.18;
+    double low_height_cluster_min_xy_area_ = 0.0;
+    double cluster_marker_min_height_ = 0.0;
 };
 
 int main(int argc, char ** argv)
