@@ -1,0 +1,7 @@
+float64 Engine_coolant_temprature
+float64 Engine_oil_temprature
+float64 Engine_oil_level
+float64 Engine_oil_pressure
+float64 UREA_level
+float64 Engine_WorkHour
+int8 Engine_Flameout

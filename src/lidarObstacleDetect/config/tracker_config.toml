@@ -1,0 +1,103 @@
+# ==============================================================================
+# 跟踪器配置文件
+# ==============================================================================
+
+# 跟踪器类型: simple_track, l_shape_track
+
+# ------------------------------------------------------------------------------
+# [simple_track] SimpleTrack 跟踪器参数
+# ------------------------------------------------------------------------------
+[simple_track]
+# 视野参数 (用于速度修正)
+fov = 60.0 
+delta_x_correction_velocity = 12.0
+delta_x_fov_down = 5.4
+
+# 初始化阈值 (决定是否创建新轨迹)
+tracklet_init_confidence_threshold = 0.3
+tracklet_init_iou_threshold = 0.1
+tracklet_init_confidence_iou_threshold = 0.2
+
+# 最大跟踪目标数量
+max_track_size = 100
+
+# 轨迹保留时间 (秒)
+track_keep_time = 2.0
+
+# 关联阈值 (TwoStage)
+association_threshold = 4.0
+
+# 关联器配置
+associate_type = "two_stage"
+
+# 运动滤波器配置 
+# 关键：对于无速度输出的模型(如Waymo)，必须使用 "l_shape"
+motion_filter = "l_shape"
+
+# 形状滤波器配置
+shape_filter = "moving_average"
+
+# TwoStage 关联器参数
+[simple_track.two_stage]
+# 优化器类型: hungarian, greedy
+optimizer = "hungarian"
+# 匹配距离阈值
+match_dist_thresh = 4.0
+
+# ID 管理器配置
+[id_manager]
+# ID 起始值
+start_id = 0
+# ID 最大值
+max_id = 10000
+
+# ------------------------------------------------------------------------------
+# [multi_anchor_motion_filter] MultiAnchor 运动滤波器参数
+# (仅当 simple_track.motion_filter = "multi_anchor" 时生效)
+# ------------------------------------------------------------------------------
+[multi_anchor_motion_filter]
+# 滤波器类型: ExtendedKalmanFilterImpl, normal_kalman
+filter_type = "ExtendedKalmanFilterImpl"
+
+# 运动模型: cv (恒速), ca (恒加)
+motion_model = "cv"
+
+# 过程噪声协方差 [x, y, vx, vy, ax, ay]
+process_noise = [1.0, 1.0, 2.0, 2.0, 0.1, 0.1]
+
+# 测量噪声协方差 [x, y, vx, vy]
+measurement_noise = [0.5, 0.5, 1.0, 1.0, 0.1, 0.1]
+
+# 初始协方差
+initial_covariance = [1.0, 1.0, 5.0, 5.0, 1.0, 0.5]
+
+# 锚点数量
+anchor_num = 3
+
+# 锚点权重衰减因子
+anchor_decay_factor = 0.9
+
+# ------------------------------------------------------------------------------
+# [l_shape] L-Shape 跟踪器参数
+# ------------------------------------------------------------------------------
+[l_shape]
+# [关键修复] 补全 LShapeTrack 初始化所需的参数
+fov = 60.0
+delta_x_correction_velocity = 12.0
+
+# 运动滤波器类型 (l_shape 内部强制使用位置差分)
+motion_filter_type = "extended_kalman_ca"
+
+# 形状滤波器类型
+shape_filter_type = "moving_average"
+
+# L-Shape 几何参数噪声
+l1_noise = 0.5
+l2_noise = 0.5
+theta_noise = 0.1
+
+# 轨迹输出过滤阈值
+# [关键修复] 将 age 阈值设为 0，防止刚检测到的物体被隐藏 (解决漏检问题)
+track_age_threshold = 0
+track_visibility_threshold = 0.0
+track_confidence_threshold = 0.3

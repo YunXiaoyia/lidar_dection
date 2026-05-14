@@ -1,0 +1,89 @@
+
+#################################################
+# detector 检测算法
+#################################################
+algorithm = 'dsvt'
+
+[dsvt]
+# algorithm = 'trt'
+out_types = ["VEHICLE", "TRUCK"]
+
+[dsvt.params]
+pointcloud_range = [-5.0, -28.0, -2.0, 149.0, 28.0, 6.0]  # [5.0, -28.0, -2.0, 117.0, 28.0, 6.0]
+voxel_size = [0.35, 0.35, 8.0]
+
+max_input_points = 100000
+input_points_channel = 4
+max_voxel_input = 15000
+max_point_per_voxel = 20
+max_set_num = 600
+
+output_rows = 500
+output_cols = 11
+
+num_classes = 2
+
+# 注意下面两个参数有需要和trt模型文件minShapes保持一致
+min_set_num = 20
+min_voxel_num = 1000
+
+
+[dsvt.dsvt_input_layer]
+max_voxel_input = 15000
+max_win_num = 15000
+stage_num = 1
+num_shifts = 2
+flag_multi_thread = true
+sparse_shape = [440, 160, 1]  # [320, 160, 1]
+windows_shape = [[12, 12, 1], [24, 24, 1]]
+set_info = [36, 4]
+hybrid_factor = [2, 2, 1]
+shift_list = [[0, 0, 0], [6, 6, 0]]
+max_set_num = 600
+
+[dsvt.network]
+#相对deb包安装路径/model的相对路径
+engine = "/opt/hw_dsvt_model/model/detection/dsvt_oridata_range150_28_distill_sim_fp16.trt"
+
+dynamic_shapes = ['pillar_features', 'pillar_coors', 'voxel_num_points',
+                 'set_voxel_inds_tensor_shift_0', 'set_voxel_inds_tensor_shift_1',
+                 'set_voxel_masks_tensor_shift_0', 'set_voxel_masks_tensor_shift_1', 'coors_in_win']
+
+[dsvt.network.inputs]
+pillar_features.dtype = 'float32'
+pillar_features.shape = [15000, 20, 4]
+
+pillar_coors.dtype = 'int32'
+pillar_coors.shape = [15000, 4]
+
+voxel_num_points.dtype = 'int32'
+voxel_num_points.shape = [15000]
+
+set_voxel_inds_tensor_shift_0.dtype = 'int32'
+set_voxel_inds_tensor_shift_0.shape = [2, 600, 36]
+
+set_voxel_inds_tensor_shift_1.dtype = 'int32'
+set_voxel_inds_tensor_shift_1.shape = [2, 600, 36]
+
+
+set_voxel_masks_tensor_shift_0.dtype = 'bool'
+set_voxel_masks_tensor_shift_0.shape = [2, 600, 36]
+
+set_voxel_masks_tensor_shift_1.dtype = 'bool'
+set_voxel_masks_tensor_shift_1.shape = [2, 600, 36]
+
+coors_in_win.dtype = 'int32'
+coors_in_win.shape = [2, 15000, 3]
+
+[dsvt.network.outputs]
+pred_box.dtype = 'float32'
+pred_box.shape = [1, 500, 11]
+
+[dsvt.network.postprocess]
+# roi_range: [x_min, y_min, z_min, x_max, y_max, z_max], 注意和当前检测算法的pointcloud_range匹配
+roi_range = [-4.0, -27.5, -2.0, 147.2, 27.5, 6.0]
+
+score_threshold = 0.4
+iou_threshold = 0.1
+iou_rectifier = [0.68, 0.71]
+

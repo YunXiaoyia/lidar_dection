@@ -1,0 +1,7 @@
+float64 retader_torque
+float64 FrontLeftBreak_Pressure
+float64 FrontRightBreak_Pressure
+float64 BackLeftBreak_Pressure
+float64 BackRightBreak_Pressure
+float64 retarder_torque_percentage
+float64 EPBParking_pressure

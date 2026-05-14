@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>lidarObstacleDetect</name>
+  <version>0.0.1</version>
+  <description>Merged Lidar Obstacle Detection Node</description>
+  <maintainer email="xiaohu@todo.todo">xiaohu</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>visualization_msgs</depend>
+  
+  <depend>pcl_ros</depend>
+  <depend>pcl_conversions</depend>
+
+  <depend>tf</depend> 
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_geometry_msgs</depend>
+
+  <depend>autoware_msgs</depend>
+  <depend>msg_gen</depend> <exec_depend>jsk_rviz_plugins</exec_depend>
+  <build_depend>jsk_rviz_plugins</build_depend>
+  <exec_depend>jsk_rviz_plugins</exec_depend>
+
+</package>

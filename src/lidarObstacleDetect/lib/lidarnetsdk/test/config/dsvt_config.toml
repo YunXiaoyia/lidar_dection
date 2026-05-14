@@ -1,0 +1,103 @@
+#################################################
+# detector 检测算法
+#################################################
+algorithm = 'dsvt'
+
+[dsvt]
+# algorithm = 'trt'
+# [Fix]: 还原为 Title Case 以确保与代码中的 ObjectTypeDict 匹配
+out_types = ['VEHICLE', 'PEDESTRIAN', 'CYCLIST']
+
+[dsvt.params]
+pointcloud_range = [-74.88, -74.88, -2, 74.88, 74.88, 4.0]
+voxel_size = [0.32, 0.32, 6.0]
+min_set_num = 1
+min_voxel_num = 1
+max_input_points = 400000
+# [Fix]: 确保为 4，匹配 Engine 输入
+input_points_channel = 4
+# [Fix]: 修改为 30000，匹配 Engine 的 maxShapes
+max_voxel_input = 30000
+max_point_per_voxel = 20
+max_set_num = 1000
+
+output_rows = 800
+output_cols = 11
+
+score_threshold = 0.1
+iou_threshold = 0.1
+num_classes = 3
+iou_rectifier = [0.68, 0.71, 0.65]
+
+
+[dsvt.dsvt_input_layer]
+# [Fix]: 修改为 30000
+max_voxel_input = 30000
+max_win_num = 10000
+stage_num = 1
+num_shifts = 2
+sparse_shape = [468, 468, 1]
+windows_shape = [[12, 12, 1], [24, 24, 1]]
+set_info = [36, 4]
+hybrid_factor = [2, 2, 1]
+shift_list = [[0, 0, 0], [6, 6, 0]]
+max_set_num = 1000
+flag_multi_thread = true
+
+[dsvt.network]
+
+engine = "/opt/deepways_master/model/dsvt_plain_e36.engine"
+
+dynamic_shapes = ['pillar_features', 'pillar_coors', 'voxel_num_points',
+                 'set_voxel_inds_tensor_shift_0', 'set_voxel_inds_tensor_shift_1',
+                 'set_to_voxel_inds_map_tensort_shift_0', 'set_to_voxel_inds_map_tensort_shift_1',
+                 'set_voxel_masks_tensor_shift_0', 'set_voxel_masks_tensor_shift_1', 'coors_in_win']
+
+[dsvt.network.inputs]
+pillar_features.dtype = 'float32'
+# [Fix]: [30000, 20, 4]
+pillar_features.shape = [30000, 20, 4]
+
+pillar_coors.dtype = 'int32'
+# [Fix]: [30000, 4]
+pillar_coors.shape = [30000, 4]
+
+voxel_num_points.dtype = 'int32'
+# [Fix]: [30000]
+voxel_num_points.shape = [30000]
+
+# Set 相关的保持 1000，与 Engine 一致
+set_voxel_inds_tensor_shift_0.dtype = 'int32'
+set_voxel_inds_tensor_shift_0.shape = [2, 1000, 36]
+
+set_voxel_inds_tensor_shift_1.dtype = 'int32'
+set_voxel_inds_tensor_shift_1.shape = [2, 1000, 36]
+
+set_to_voxel_inds_map_tensort_shift_0.dtype = 'int32'
+# [Fix]: [2, 30000]
+set_to_voxel_inds_map_tensort_shift_0.shape = [2, 30000]
+
+set_to_voxel_inds_map_tensort_shift_1.dtype = 'int32'
+# [Fix]: [2, 30000]
+set_to_voxel_inds_map_tensort_shift_1.shape = [2, 30000]
+
+set_voxel_masks_tensor_shift_0.dtype = 'bool'
+set_voxel_masks_tensor_shift_0.shape = [2, 1000, 36]
+
+set_voxel_masks_tensor_shift_1.dtype = 'bool'
+set_voxel_masks_tensor_shift_1.shape = [2, 1000, 36]
+
+coors_in_win.dtype = 'int32'
+# [Fix]: [2, 30000, 3]
+coors_in_win.shape = [2, 30000, 3]
+
+[dsvt.network.outputs]
+pred_box.dtype = 'float32'
+pred_box.shape = [1, 500, 11]
+
+
+[dsvt.network.postprocess]
+score_threshold = 0.05
+iou_threshold = 0.1
+roi_range = [-74.88, -74.88, -2, 74.88, 74.88, 4.0]
+iou_rectifier = [0.68, 0.71, 0.65]

@@ -1,0 +1,2 @@
+float64 total_miles
+float64 subtotal_miles

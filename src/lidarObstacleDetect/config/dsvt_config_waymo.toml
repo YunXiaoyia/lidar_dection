@@ -1,0 +1,168 @@
+# # ==============================================================================
+# # DSVT 部署配置 (A1200_full 大范围模型)
+# # ==============================================================================
+
+# algorithm = "dsvt"
+
+# class_names = ["car", "pedestrian", "cycle"]
+
+# [dsvt]
+# out_types = ["VEHICLE", "PEDESTRIAN", "CYCLIST"]
+
+# [dsvt.params]
+# min_set_num = 20
+# min_voxel_num = 2000
+# max_set_num = 1200
+# pointcloud_range = [-74.88, -74.88, -2.0, 74.88, 74.88, 4.0]
+# voxel_size = [0.32, 0.32, 6.0]
+# input_points_channel = 4
+# max_input_points = 200000
+# max_voxel_input = 20000
+# max_point_per_voxel = 30
+# output_rows = 500
+# output_cols = 11
+# num_classes = 3
+
+# [dsvt.dsvt_input_layer]
+# max_voxel_input = 20000
+# max_win_num = 30000
+# stage_num = 1
+# num_shifts = 2
+# sparse_shape = [468, 468, 1]
+# windows_shape = [[12, 12, 1], [12, 12, 1]]
+# set_info = [36, 4]
+# hybrid_factor = [2, 2, 1]
+# shift_list = [[0, 0, 0], [6, 6, 0]]
+# max_set_num = 1200
+# flag_multi_thread = true
+
+# [dsvt.network]
+# engine = "/workspace/tensorrt/dsvt_202604292038.trt"
+# dynamic_shapes = ["pillar_features", "pillar_coors", "voxel_num_points", "set_voxel_inds_tensor_shift_0", "set_voxel_inds_tensor_shift_1", "set_voxel_masks_tensor_shift_0", "set_voxel_masks_tensor_shift_1", "coors_in_win"]
+
+# [dsvt.network.inputs]
+# pillar_features.dtype = "float32"
+# pillar_features.shape = [20000, 30, 4]
+# pillar_coors.dtype = "int32"
+# pillar_coors.shape = [20000, 4]
+# voxel_num_points.dtype = "int32"
+# voxel_num_points.shape = [20000]
+# set_voxel_inds_tensor_shift_0.dtype = "int32"
+# set_voxel_inds_tensor_shift_0.shape = [2, 1200, 36]
+# set_voxel_inds_tensor_shift_1.dtype = "int32"
+# set_voxel_inds_tensor_shift_1.shape = [2, 1200, 36]
+# set_voxel_masks_tensor_shift_0.dtype = "bool"
+# set_voxel_masks_tensor_shift_0.shape = [2, 1200, 36]
+# set_voxel_masks_tensor_shift_1.dtype = "bool"
+# set_voxel_masks_tensor_shift_1.shape = [2, 1200, 36]
+# coors_in_win.dtype = "int32"
+# coors_in_win.shape = [2, 20000, 3]
+
+# [dsvt.network.outputs]
+# pred_box.dtype = "float32"
+# pred_box.shape = [1, 500, 11]
+
+# [dsvt.network.postprocess]
+# score_threshold = 0.5
+# iou_threshold = 0.3
+# roi_range = [-72.88, -72.88, -10.0, 72.88, 72.88, 10.0]
+# iou_rectifier = [0.68, 0.71, 0.65]
+
+# [tracker]
+# method = "stable_track"
+
+# [stable_track]
+# init_confidence_threshold = 0.5
+# init_iou_threshold = 0.4
+# class_mismatch_penalty = 100.0
+# min_continuous_det_num = 3
+# max_occluded_lost_num = 10
+# valid_lost_duration = 0.6
+
+# [l_shape]
+# delta_x_correction_velocity = 10.0
+# fov = 80.0
+# ==============================================================================
+# DSVT 部署配置 (A1200_full 大范围模型)
+# ==============================================================================
+
+algorithm = "dsvt"
+
+class_names = ["car", "pedestrian", "cycle"]
+
+[dsvt]
+out_types = ["VEHICLE", "PEDESTRIAN", "CYCLIST"]
+
+[dsvt.params]
+min_set_num = 20
+min_voxel_num = 2000
+max_set_num = 1200
+pointcloud_range = [-31.84, -26.88, -2.0, 71.84, 26.88, 4.0]
+voxel_size = [0.32, 0.32, 6.0]
+input_points_channel = 4
+max_input_points = 200000
+max_voxel_input = 20000
+max_point_per_voxel = 30
+output_rows = 500
+output_cols = 11
+num_classes = 3
+
+[dsvt.dsvt_input_layer]
+max_voxel_input = 20000
+max_win_num = 30000
+stage_num = 1
+num_shifts = 2
+sparse_shape = [324, 168, 1]
+windows_shape = [[12, 12, 1], [12, 12, 1]]
+set_info = [36, 4]
+hybrid_factor = [2, 2, 1]
+shift_list = [[0, 0, 0], [6, 6, 0]]
+max_set_num = 1200
+flag_multi_thread = true
+
+[dsvt.network]
+engine = "/workspace/tensorrt/waymo_full_pre.trt"
+dynamic_shapes = ["pillar_features", "pillar_coors", "voxel_num_points", "set_voxel_inds_tensor_shift_0", "set_voxel_inds_tensor_shift_1", "set_voxel_masks_tensor_shift_0", "set_voxel_masks_tensor_shift_1", "coors_in_win"]
+
+[dsvt.network.inputs]
+pillar_features.dtype = "float32"
+pillar_features.shape = [20000, 30, 4]
+pillar_coors.dtype = "int32"
+pillar_coors.shape = [20000, 4]
+voxel_num_points.dtype = "int32"
+voxel_num_points.shape = [20000]
+set_voxel_inds_tensor_shift_0.dtype = "int32"
+set_voxel_inds_tensor_shift_0.shape = [2, 1200, 36]
+set_voxel_inds_tensor_shift_1.dtype = "int32"
+set_voxel_inds_tensor_shift_1.shape = [2, 1200, 36]
+set_voxel_masks_tensor_shift_0.dtype = "bool"
+set_voxel_masks_tensor_shift_0.shape = [2, 1200, 36]
+set_voxel_masks_tensor_shift_1.dtype = "bool"
+set_voxel_masks_tensor_shift_1.shape = [2, 1200, 36]
+coors_in_win.dtype = "int32"
+coors_in_win.shape = [2, 20000, 3]
+
+[dsvt.network.outputs]
+pred_box.dtype = "float32"
+pred_box.shape = [1, 500, 11]
+
+[dsvt.network.postprocess]
+score_threshold = 0.5
+iou_threshold = 0.3
+roi_range = [-31.84, -26.88, -2.0, 71.84, 26.88, 4.0]
+iou_rectifier = [0.68, 0.71, 0.65]
+
+[tracker]
+method = "stable_track"
+
+[stable_track]
+init_confidence_threshold = 0.5
+init_iou_threshold = 0.4
+class_mismatch_penalty = 100.0
+min_continuous_det_num = 3
+max_occluded_lost_num = 10
+valid_lost_duration = 0.6
+
+[l_shape]
+delta_x_correction_velocity = 10.0
+fov = 80.0

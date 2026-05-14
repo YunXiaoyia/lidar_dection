@@ -1,0 +1,4 @@
+float64 lengthways_Angle
+float64 widthways_Angle
+float64 Lifting_Angle
+int8 Angle_OFFLimit

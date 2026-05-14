@@ -1,0 +1,22 @@
+# CUDA Toolkit
+find_package(CUDAToolkit 10.2 REQUIRED)
+include_directories(${CUDA_INCLUDE_DIRS})
+set(CUDA_SEPARABLE_COMPILATION ON)
+
+# CUDNN
+find_package(CUDNN REQUIRED)
+include_directories(${CUDNN_INCLUDE_DIRS})
+
+# TRT
+find_package(TensorRT REQUIRED)
+include_directories(${TRT_INCLUDE_DIRS})
+
+if($CMAKE_BUILD_TYPE MATCHES "Debug")
+  message(STATUS "CUDAToolkit_INCLUDE_DIRS: ${CUDAToolkit_INCLUDE_DIRS}")
+  message(STATUS "CUDAToolkit_LIBRARY_DIR: ${CUDAToolkit_LIBRARY_DIR}")
+  message(STATUS "CUDNN_LIBRARIES: ${CUDNN_LIBRARIES}")
+  message(STATUS "CUDNN_LIBRARIES_STATIC: ${CUDNN_LIBRARIES_STATIC}")
+  message(STATUS "CUDNN_INCLUDE_DIRS: ${CUDNN_INCLUDE_DIRS}")
+  message(STATUS "TRT_LIBRARIES: ${TRT_LIBRARIES} ")
+  message(STATUS "TRT_LIBRARIES_STATIC: ${TRT_LIBRARIES_STATIC} ")
+endif()

@@ -1,0 +1,8 @@
+/* Hides all symbols except those specified in the global section */
+{
+  global:
+    extern "C++" {
+      lidar_net::LidarNetDetector::*;
+    };
+  local: *;
+};

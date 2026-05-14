@@ -1,0 +1,270 @@
+#################    校园场景  #######################
+# parent_pc_topic: "/rslidar/middle/rslidar_points"
+# child_pc_topic1: "/rslidar/right/rslidar_points"
+# child_pc_topic2: "/rslidar/left/rslidar_points"
+# child_pc_topic3: "/rslidar/back/rslidar_points"
+# child_pc_topic4: "/rslidar/front/rslidar_points"
+
+# #融合相关参数======================================
+# ####坐标系转换
+# ppc_to_vehicle:
+#    x: 5.8
+#    y: 0.0
+#    z: 2.45
+#    roll: 0.04      
+#    pitch: 0.02
+#    yaw: 1.65    
+
+# cpc1_to_ppc:                                                                   
+#    x: -0.815951
+#    y: 3.72046
+#    z: -1.93737
+#    roll: -1.63161     
+#    pitch: -1.20585 
+#    yaw: 1.57609      
+
+# cpc2_to_ppc:
+#    x: 1.39888
+#    y: 3.85676
+#    z: -1.89363
+#    roll: 1.60132   
+#    pitch: -1.97398     
+#    yaw: 1.44157    
+
+# cpc3_to_ppc:
+#    x: 0.553435
+#    y: 7.66673
+#    z: -2.05
+#    roll: 1.6      
+#    pitch: -0.345   
+#    yaw: 3.05048   
+   
+# cpc4_to_ppc:
+#    x: 0.0
+#    y: -0.45
+#    z: -1.9
+#    roll: 0.028     
+#    pitch: -2.932   
+#    yaw: 1.48 
+
+# # 是否启用外部边界滤波 (保留边界内的点，滤除外部噪点)
+# use_external_bounds_filter: true
+# # 是否启用内部边界滤波 (滤除边界内的点，例如车身)
+# use_internal_bounds_filter: true
+
+# #裁切（外轮廓）
+# external_bounds:
+#   x_min: -10.0
+#   x_max: 50.0
+#   y_min: -12.0
+#   y_max: 12.0
+#   z_min: -0.6  
+#   z_max: 2.3
+# #裁切（车身轮廓）
+# internal_bounds:
+#   x_min: -2.2
+#   x_max: 6.15
+#   y_min: -1.6
+#   y_max: 1.6
+#   z_min: -0.4 
+#   z_max: 2.6
+
+# #---------融合后处理相关---------------
+
+# ##ground_detector===========================================
+
+# sensor_height: 0.4  #坐标原点高度
+# num_iter: 2 #迭代多少次来拟合地平面
+
+# # 平面拟合参数 (Plane Fitting Parameters)
+# num_lpr: 15 #最低代表点的数量
+# num_min_pts: 10 #扇区内的最小点数，否则不处理
+# th_seeds: 0.125 #种子点阈值：在 LPR 估计的平均地面高度之上多高范围内的点，被认为是初始的地面“种子点”
+# th_dist: 0.15 #距离阈值：在 RANSAC 迭代中，一个点距离拟合平面的最大距离,小于此距离的点被认为是地面点
+
+# # 区域与范围参数
+
+# max_range: 50.0     #最远点（会忽略掉）
+# min_range: 1.0      #最近点（会忽略掉）
+
+# num_zone: 4         #区块数
+# num_sectors_each_zone: [20, 24, 32, 32]  #区块内扇区数
+# num_rings_each_zone: [6, 6, 6, 6]        #区块内环数
+# min_ranges: [12.0, 24.0, 35.0, 50.0]     #区块距离：zone_1(min,[0]),zone_1([0],[1])、、、
+
+# leaf_sizes: [0.15, 0.3, 0.4, 0.7] #动态体素滤波：每个 Zone 使用的体素大小
+
+# uprightness_thr: 0.5 #直立性阈值：范围是 [0, 1]。越接近 1，表示平面越水平。如果大于此值，才被认为是“地面”。
+
+
+# ##euclidean_cluster===========================================
+
+# clusterTolerance: 0.3 #距离容忍度,两个点要被视为同一聚类（簇）的最大距离
+# minClusterSize: 9 #一个有效聚类所需要包含的最小点数
+# maxClusterSize: 5000 #一个有效聚类所能包含的最大点数
+# use_multiple_thres: true #是否使用多阈值聚类
+# clustering_distances: [0.2, 0.35, 0.6, 0.8, 1.2] #多阈值聚类所使用的距离容忍度列表
+# clustering_ranges: [5, 12, 25, 40] #多阈值聚类所使用的距离范围阈值
+
+
+# ### boundingBox
+# inEstimatePose: true #//是否估计聚类的姿态
+# clusterMergeThreshold: 0.7 #聚类合并阈值，质心距离
+# boxMergeThreshold: 0.15 # 多边形框合并阈值，不同边距离
+
+# concave_hull_dist: 30.0  # 多少米以内允许使用凹包 (单位: m)
+# concave_hull_alpha: 5.0  # 凹包 alpha 值 (值越小轮廓越紧致但可能破碎，建议 0.5~1.0)
+
+# large_object_length_threshold: 8.0f
+# large_object_width_threshold: 8.0f
+
+
+#################    矿卡场景  #######################
+parent_pc_topic: "/rslidar/middle/rslidar_points"
+child_pc_topic1: "/rslidar/right/rslidar_points"
+child_pc_topic2: "/rslidar/left/rslidar_points"
+child_pc_topic3: "/rslidar/back/rslidar_points"
+use_child1_lidar: false  # 右侧雷达故障时保持 false；修复后改 true 或通过 launch 参数覆盖。
+
+#融合相关参数======================================
+####坐标系转换
+ppc_to_vehicle:
+   x: 7.4
+   y: 0.0
+   z: 1.074
+   roll: 0.00      
+   pitch: 0
+   yaw: -0.015    
+
+cpc1_to_ppc:                                                                   
+   x: -0.85
+   y: -2.17
+   z: -0.15
+   roll: 0.00   
+   pitch: 0.0075
+   yaw: 0.012      
+
+cpc2_to_ppc:
+   x: -0.91
+   y: 2.2
+   z: -0.12
+   roll: -0.01    
+   pitch: -0.01
+   yaw: 0.012  
+
+cpc3_to_ppc:
+   x: -9.38
+   y: -0.19
+   z: 0.23
+   roll: -3.137   
+   pitch: -0.185
+   yaw: 3.15  
+   
+# ====== Child 1 (例如：右侧雷达) ======
+child1_use_sector_filter: true
+child1_sector:
+  min_deg: -30.0   
+  max_deg: -30.0
+# 同时启用 x 轴范围过滤，前方交给主雷达，侧雷达只保留指定 x 范围
+child1_use_distance_filter: true
+child1_distance:
+  min_dist: 0
+  max_dist: 0 #8
+
+# ====== Child 2 (例如：左侧雷达) ======
+child2_use_sector_filter: false # 不启用扇形裁剪
+child2_sector:
+  min_deg: 30.0     
+  max_deg: 150.0
+# 但只启用 x 轴范围裁剪
+child2_use_distance_filter: true
+child2_distance:
+  min_dist: -8.3
+  max_dist: 8
+
+# ====== Child 3 (例如：后侧雷达) ======
+child3_use_sector_filter: false
+child3_sector:
+  min_deg: 180.0   # 跨越 180 度边界的情况现在已完美支持！
+  max_deg: -180.0    
+child3_use_distance_filter: false # 不启用距离过滤
+
+# 是否启用外部边界滤波 (保留边界内的点，滤除外部噪点)
+use_external_bounds_filter: true
+# 是否启用内部边界滤波 (滤除边界内的点，例如车身)
+use_internal_bounds_filter: true
+
+#裁切（外轮廓）
+external_bounds:
+  x_min: -15.0
+  x_max: 70.0
+  y_min: -20.0
+  y_max: 20.0
+  z_min: -1.5  
+  z_max: 4.5
+#裁切（车身轮廓）
+internal_bounds:
+  x_min: -3.3
+  x_max: 7.4
+  y_min: -2.6
+  y_max: 2.6
+  z_min: -0.4 
+  z_max: 3.7
+
+#---------融合后处理相关---------------
+
+##ground_detector===========================================
+
+sensor_height: 0.5  #坐标原点高度
+num_iter: 5 #迭代多少次来拟合地平面
+
+# 平面拟合参数 (Plane Fitting Parameters)
+num_lpr: 15 #最低代表点的数量
+num_min_pts: 10 #扇区内的最小点数，否则不处理
+th_seeds: 0.125 #种子点阈值：在 LPR 估计的平均地面高度之上多高范围内的点，被认为是初始的地面“种子点”
+th_dist: 0.15 #距离阈值：在 RANSAC 迭代中，一个点距离拟合平面的最大距离,小于此距离的点被认为是地面点
+use_ground_temporal_stabilizer: true
+ground_plane_ema_alpha: 0.25
+ground_cache_max_miss: 10
+ground_enter_dist: 0.15
+nonground_exit_dist: 0.25
+small_patch_fallback_z: 0.25
+publish_ground_debug: true
+
+# 区域与范围参数
+
+max_range: 50.0     #最远点（会忽略掉）
+min_range: 1.0      #最近点（会忽略掉）
+
+num_zone: 4         #区块数
+num_zones: 4        #兼容 PatchWork 参数名
+num_sectors_each_zone: [20, 24, 32, 32]  #区块内扇区数
+num_rings_each_zone: [6, 6, 6, 6]        #区块内环数
+min_ranges: [12.0, 24.0, 35.0, 50.0]     #区块距离：zone_1(min,[0]),zone_1([0],[1])、、、
+
+leaf_sizes: [0.15, 0.3, 0.4, 0.7] #动态体素滤波：每个 Zone 使用的体素大小
+
+uprightness_thr: 0.50 #直立性阈值：范围是 [0, 1]。越接近 1，表示平面越水平。如果大于此值，才被认为是“地面”。
+
+
+##euclidean_cluster===========================================
+
+clusterTolerance: 0.3 #距离容忍度,两个点要被视为同一聚类（簇）的最大距离
+minClusterSize: 5 #一个有效聚类所需要包含的最小点数
+maxClusterSize: 5000 #一个有效聚类所能包含的最大点数
+use_multiple_thres: true #是否使用多阈值聚类
+clustering_distances: [0.2, 0.35, 0.6, 0.8, 1.2] #多阈值聚类所使用的距离容忍度列表
+clustering_ranges: [5, 12, 25, 40] #多阈值聚类所使用的距离范围阈值
+
+
+### boundingBox
+inEstimatePose: true #//是否估计聚类的姿态
+clusterMergeThreshold: 0.7 #聚类合并阈值，质心距离
+boxMergeThreshold: 0.15 # 多边形框合并阈值，不同边距离
+
+concave_hull_dist: 30.0  # 多少米以内允许使用凹包 (单位: m)
+concave_hull_alpha: 5.0  # 凹包 alpha 值 (值越小轮廓越紧致但可能破碎，建议 0.5~1.0)
+
+large_object_length_threshold: 8.0f
+large_object_width_threshold: 8.0f
+

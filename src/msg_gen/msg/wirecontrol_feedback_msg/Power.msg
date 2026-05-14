@@ -1,0 +1,4 @@
+float64 Fuel_consumption_Last
+float64 Fuel_consumption_phour
+float64 Fuel_consumption_total
+float64 Battery_Voltage

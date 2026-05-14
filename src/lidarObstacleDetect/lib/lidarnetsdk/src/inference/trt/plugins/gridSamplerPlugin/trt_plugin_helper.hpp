@@ -1,0 +1,48 @@
+// Copyright (c) OpenMMLab. All rights reserved.
+#ifndef LIB_INFERENCE_TRT_PLUGINS_GRIDSAMPLERPLUGIN_TRT_PLUGIN_HELPER
+#define LIB_INFERENCE_TRT_PLUGINS_GRIDSAMPLERPLUGIN_TRT_PLUGIN_HELPER
+
+#include <cudnn.h>
+
+#include <iostream>
+#include <stdexcept>
+
+#include "NvInferRuntime.h"
+
+cudnnStatus_t convert_trt2cudnn_dtype(nvinfer1::DataType trt_dtype, cudnnDataType_t* cudnn_dtype);
+
+namespace mmdeploy {
+
+const int MAXTENSORDIMS = 10;
+
+struct TensorDesc {
+    int shape[MAXTENSORDIMS];
+    int stride[MAXTENSORDIMS];
+    int dim;
+};
+
+inline unsigned int getElementSize(nvinfer1::DataType t) {
+    switch (t) {
+        case nvinfer1::DataType::kINT32:
+            return 4;
+        case nvinfer1::DataType::kFLOAT:
+            return 4;
+        case nvinfer1::DataType::kHALF:
+            return 2;
+        // case nvinfer1::DataType::kBOOL:
+        case nvinfer1::DataType::kINT8:
+            return 1;
+        default:
+            throw std::runtime_error("Invalid DataType.");
+    }
+    throw std::runtime_error("Invalid DataType.");
+    return 0;
+}
+
+inline size_t getAlignedSize(size_t origin_size, size_t aligned_number = 16) {
+    return size_t((origin_size + aligned_number - 1) / aligned_number) * aligned_number;
+}
+
+}  // namespace mmdeploy
+
+#endif /* LIB_INFERENCE_TRT_PLUGINS_GRIDSAMPLERPLUGIN_TRT_PLUGIN_HELPER */

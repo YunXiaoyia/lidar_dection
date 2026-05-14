@@ -1,0 +1,3 @@
+float64 Gas_pedal_percentage
+float64 Gas_pedal_percentage_actual
+float64 Break_pedal_percentage

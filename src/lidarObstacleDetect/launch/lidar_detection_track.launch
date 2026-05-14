@@ -1,0 +1,14 @@
+<launch>
+    <arg name="config_file" default="$(find lidarObstacleDetect)/config/dsvt_config_waymo.toml" />
+    <arg name="use_child1_lidar" default="false" />
+    
+    <node pkg="lidarObstacleDetect" type="lidar_detector_node" name="lidar_detection_track_node" output="screen">
+        <param name="tracker_type" value="simple_track" />
+        <param name="config_path" value="$(arg config_file)" />
+        
+        <rosparam file="$(find lidarObstacleDetect)/config/lidar_detection_track.yaml" command="load" />
+        <param name="use_child1_lidar" value="$(arg use_child1_lidar)" />
+
+        
+    </node>
+</launch>

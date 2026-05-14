@@ -1,0 +1,92 @@
+
+#################################################
+# detector 检测算法
+#################################################
+algorithm = 'flatformer'
+
+[flatformer]
+# algorithm = 'trt'
+out_types = ["VEHICLE", "TRUCK"]
+
+
+[flatformer.params]
+pointcloud_range = [-5.0, -28.0, -2.0, 149.0, 28.0, 6.0]  # [5.0, -28.0, -2.0, 117.0, 28.0, 6.0]
+voxel_size = [0.35, 0.35, 8.0]
+
+max_input_points = 100000
+input_points_channel = 4
+max_voxel_input = 15000
+max_point_per_voxel = 20
+max_group_num = 105
+group_size = 144
+
+output_rows = 500
+output_cols = 11
+
+num_classes = 2
+
+# 注意下面两个参数有需要和trt模型文件minShapes保持一致
+min_group_num = 25
+min_voxel_num = 3000
+
+
+[flatformer.flattened_window_mapping]
+max_voxel_input = 15000
+max_group_num = 105
+num_shifts = 2
+flag_multi_thread = true
+sparse_shape = [440, 160, 1]  # [320, 160, 1]
+windows_shape = [13, 13, 1]
+group_size = 144
+
+
+[flatformer.network]
+engine = "/opt/hw_flatformer_model/model/detection/test_flatformer_sim_fp16.trt"
+# engine = "/home/lgj/test/flatformer_fp16/flatformer_model_0523_sim_fp16.trt"
+
+
+dynamic_shapes = ['voxels', 'pillar_coords', 'voxel_num_points',
+                 'flat2win', 'win2flat',
+                 'mapping_x', 'mapping_y', 'mapping_x_shift', 'mapping_y_shift']
+
+[flatformer.network.inputs]
+voxels.dtype = 'float32'
+voxels.shape = [15000, 20, 4]
+
+pillar_coords.dtype = 'int32'
+pillar_coords.shape = [15000, 4]
+
+voxel_num_points.dtype = 'int32'
+voxel_num_points.shape = [15000]
+
+flat2win.dtype = 'int32'
+flat2win.shape = [105, 144]
+
+win2flat.dtype = 'int32'
+win2flat.shape = [15000]
+
+
+mapping_x.dtype = 'int32'
+mapping_x.shape = [15000]
+
+mapping_y.dtype = 'int32'
+mapping_y.shape = [15000]
+
+mapping_x_shift.dtype = 'int32'
+mapping_x_shift.shape = [15000]
+
+mapping_y_shift.dtype = 'int32'
+mapping_y_shift.shape = [15000]
+
+[flatformer.network.outputs]
+pred_box.dtype = 'float32'
+pred_box.shape = [1, 500, 11]
+
+
+[flatformer.network.postprocess]
+# roi_range: [x_min, y_min, z_min, x_max, y_max, z_max], 注意和当前检测算法的pointcloud_range匹配
+roi_range = [-4.0, -27.5, -2.0, 147.2, 27.5, 6.0]
+
+score_threshold = 0.4
+iou_threshold = 0.1
+iou_rectifier = [0.68, 0.71]
