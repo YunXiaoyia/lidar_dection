@@ -179,7 +179,7 @@ child2_sector:
 # 但只启用 x 轴范围裁剪
 child2_use_distance_filter: true
 child2_distance:
-  min_dist: -8.3
+  min_dist: -7.5
   max_dist: 8
 
 # ====== Child 3 (例如：后侧雷达) ======
